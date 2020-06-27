@@ -1,20 +1,20 @@
 # Launch Instances
-resource "aws_instance" "ec2-instance" {
-    count   = "${var.instance_count}"
+resource "aws_instance" "main" {
+    count   = var.create && var.instance_count ? 1 : 0
 
-    ami                         = "${var.ami}"
-    availability_zone           = "${element(var.availability_zone, count.index)}"
-    ebs_optimized               = "${var.ebs_optimized}"
-    instance_type               = "${var.instance_type}"
-    monitoring                  = "${var.monitoring}"
-    key_name                    = "${var.key_name}"
-    iam_instance_profile        = "${var.iam_instance_profile}"
-    subnet_id                   = "${element(var.subnet_id, count.index)}"
-    vpc_security_group_ids      = "${var.vpc_security_group_ids}"
-    associate_public_ip_address = "${var.associate_public_ip_address}"
-    source_dest_check           = "${var.source_dest_check}"
-    disable_api_termination     = "${var.disable_api_termination}"
-    user_data                   = "${var.user_data}"
+    ami                         = var.ami
+    availability_zone           = element(var.availability_zone, count.index)
+    ebs_optimized               = var.ebs_optimized
+    instance_type               = var.instance_type
+    monitoring                  = var.monitoring
+    key_name                    = var.key_name
+    iam_instance_profile        = var.iam_instance_profile
+    subnet_id                   = element(var.subnet_id, count.index)
+    vpc_security_group_ids      = var.vpc_security_group_ids
+    associate_public_ip_address = var.associate_public_ip_address
+    source_dest_check           = var.source_dest_check
+    disable_api_termination     = var.disable_api_termination
+    user_data                   = var.user_data
 
     dynamic "root_block_device" {
         for_each    = var.root_block_device
@@ -50,7 +50,7 @@ resource "aws_instance" "ec2-instance" {
         {
             "Name"  = var.instance_count > 1 || var.use_num_suffix ? format("%s-%d", var.name, count.index + 1) : var.name
         },
-        "${var.default_tags}",
+        var.default_tags,
     )
 
     volume_tags = merge(
@@ -58,7 +58,7 @@ resource "aws_instance" "ec2-instance" {
             "Name"  = var.instance_count > 1 || var.use_num_suffix ? format("%s-%d", var.name, count.index + 1) : var.name
 
         },
-        "${var.default_tags}"
+        var.default_tags
     )
 
 }
